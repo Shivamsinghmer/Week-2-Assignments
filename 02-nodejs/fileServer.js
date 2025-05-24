@@ -20,6 +20,36 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const app = express();
+const filesDirectory = path.join(__dirname, 'files');
+
+// Endpoint to get the list of files
+app.get('/files', (req, res) => {
+  fs.readdir(filesDirectory, (err, files) => {
+    if (err) {
+      return res.status(500).send('Error reading files directory');
+    }
+    res.status(200).json(files);
+  });
+});
+
+// Endpoint to get the content of a specific file
+app.get('/file/:filename', (req, res) => {
+  const filePath = path.join(filesDirectory, req.params.filename);
+  fs.readFile(filePath, 'utf8', (err, data) => {
+    if (err) {
+      if (err.code === 'ENOENT') {
+        return res.status(404).send('File not found');
+      }
+      return res.status(500).send('Error reading file');
+    }
+    res.status(200).send(data);
+  });
+});
+
+// Handle undefined routes
+app.use((req, res) => {
+  res.status(404).send('Route not found');
+});
 
 
 module.exports = app;

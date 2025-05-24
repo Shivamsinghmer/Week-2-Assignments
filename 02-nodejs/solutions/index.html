@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TODO App</title>
+    <script>
+      async function addTodo() {
+        try {
+          const title = document.getElementById("title").value;
+          const description = document.getElementById("description").value;
+
+          const response = await fetch("http://localhost:3000/todos", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ title, description }),
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to add TODO");
+          }
+
+          const data = await response.json();
+          console.log(data);
+          alert("TODO added successfully!");
+        } catch (error) {
+          console.error("Error adding TODO:", error);
+          alert("Error adding TODO. Please try again.");
+        }
+      }
+
+      async function fetchTodos() {
+        try {
+          const response = await fetch("http://localhost:3000/todos", {
+            method: "GET",
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to fetch TODOs");
+          }
+
+          const todos = await response.json();
+          const todoList = document.getElementById("todo-list");
+          todoList.innerHTML = "";
+
+          todos.forEach((todo) => {
+            const li = document.createElement("li");
+            li.textContent = `${todo.title}: ${todo.description}`;
+            todoList.appendChild(li);
+          });
+        } catch (error) {
+          console.error("Error fetching TODOs:", error);
+          alert("Error fetching TODOs. Please try again.");
+        }
+      }
+    </script>
+  </head>
+
+  <body>
+    <h1>TODO App</h1>
+    <label for="title">Title: </label>
+    <input type="text" name="title" placeholder="Enter the title" id="title" />
+    <label for="description">Description: </label>
+    <input
+      type="text"
+      name="description"
+      placeholder="Enter the description"
+      id="description"
+    />
+    <button onclick="addTodo()">Save TODO</button>
+    <button onclick="fetchTodos()">Fetch TODOs</button>
+
+    <h2>TODO List</h2>
+    <ul id="todo-list"></ul>
+  </body>
+</html>

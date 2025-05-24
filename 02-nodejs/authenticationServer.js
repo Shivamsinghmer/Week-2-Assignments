@@ -34,4 +34,68 @@ const PORT = 3000;
 const app = express();
 // write your logic here, DONT WRITE app.listen(3000) when you're running tests, the tests will automatically start the server
 
+app.use(express.json());
+
+let users = [];
+let userId = 1;
+
+app.post("/signup", (req, res) => {
+  const { username, password, firstName, lastName } = req.body;
+
+  if (users.find(user => user.username === username)) {
+    return res.status(400).send("Username already exists");
+  }
+
+  const newUser = {
+    id: userId++,
+    username,
+    password,
+    firstName,
+    lastName
+  };
+
+  users.push(newUser);
+  res.status(201).send("Signup successful");
+});
+
+app.post("/login", (req, res) => {
+  const { username, password } = req.body;
+
+  const user = users.find(user => user.username === username && user.password === password);
+
+  if (!user) {
+    return res.status(401).send("Invalid credentials");
+  }
+
+  res.status(200).json({
+    token: "authenticated",
+    email: user.username,
+    firstName: user.firstName,
+    lastName: user.lastName
+  });
+});
+
+app.get("/data", (req, res) => {
+  const username = req.headers.username;
+  const password = req.headers.password;
+
+  const user = users.find(user => user.username === username && user.password === password);
+
+  if (!user) {
+    return res.status(401).send("Unauthorized");
+  }
+
+  const userData = users.map(user => ({
+    email: user.username,
+    firstName: user.firstName,
+    lastName: user.lastName
+  }));
+
+  res.status(200).json({ users: userData });
+});
+
+app.use((req, res) => {
+  res.status(404).send("Not Found");
+}); 
+
 module.exports = app;
